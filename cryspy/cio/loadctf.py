@@ -5,7 +5,7 @@ def loadctf(filepath):
     import numpy as np
     import cryspy.ebsd as ebsd
     import cryspy.rot as rot
-    import righthand as rh
+    import cryspy.util as util
     import cryspy.xtal as xtal
 
     # open the file and separate out the header from the data
@@ -53,7 +53,7 @@ def loadctf(filepath):
                                                        int(strdat[4].strip())))
     
     
-    pb = rh.progbar(finalcount=np.size(dat), message='LOADING EBSD DATA')
+    pb = util.progbar(finalcount=np.size(dat), message='LOADING EBSD DATA')
     
     # Parse the data into lists
     shdat = np.shape(dat)
@@ -72,16 +72,16 @@ def loadctf(filepath):
     ndex = 0
     for line in dat:
         
-        s = [float(item) for item in line.split()]
+        s= map(float, line.split())
         
-        phase[ndex]  = s[ 0] - 1
+        phase[ndex]  = s[ 0]
         x[ndex]      = s[ 1]
         y[ndex]      = s[ 2]
         nbands[ndex] = s[ 3]
         error[ndex] = s[ 4]
-        eul1[ndex]   = s[ 5] * np.pi/180.0
-        eul2[ndex]   = s[ 6] * np.pi/180.0
-        eul3[ndex]   = s[ 7] * np.pi/180.0
+        eul1[ndex]   = s[ 5]
+        eul2[ndex]   = s[ 6]
+        eul3[ndex]   = s[ 7]
         mad[ndex]    = s[ 8]
         bc[ndex]     = s[ 9]
         bs[ndex]     = s[10]
@@ -117,7 +117,5 @@ def loadctf(filepath):
     ebsd_data.error = error
     ebsd_data.nbands = nbands
     ebsd_data._original_header = hdr
-    ebsd_data._original_phase = phase - 1
-    ebsd_data._original_euler = np.vstack([eul1, eul2, eul3]).T
 
     return ebsd_data

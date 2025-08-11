@@ -71,7 +71,7 @@ class ebsd(object):
         import numpy as np
         
         if not hasattr(self, 'x') or not hasattr(self, 'y'):
-            print('x and y coordinates are needed for plotting ebsd data.') #TODO: Use warnings package?
+            print('x and y coordinates are needed for plotting ebsd data.')
         
         if not hasattr(self, 'rows') or not hasattr(self, 'cols'):
             rows, cols = scansize(self.x, self.y)
@@ -146,7 +146,7 @@ def scansize(x, y):
 
     if np.size(x) != np.size(y):
         print('scansize: the lengths of x and y are not equal. this may result\
-               in errors.') #TODO: use warnings package?
+               in errors.')
     
     # count the number of pixels in the horizontal direction
     # i.e, the maximum number of columns 
@@ -198,7 +198,7 @@ def scanstep(x, y, nr, nc):
 
     if np.size(x) != np.size(y):
         print('scanstep: the lengths of x and y are not equal. this may result\
-               in errors.') # TODO: use warnings package?
+               in errors.')
     
     # Get the scan size
     if np.size(nc)==2: # hexagonal scan
@@ -212,7 +212,7 @@ def scanstep(x, y, nr, nc):
         # This means a hex scan size of at least 5 points is a reasonable
         # minimum: 2 points in the first and third rows, 1 point in the middle
         # row.
-        print('scanstep error: at least 5 data points required') # TODO: warnings?
+        print('scanstep error: at least 5 data points required')
     else:
         xstep = x[1]-x[0]
         ystep = y[nc]-y[nc-1]
@@ -233,22 +233,22 @@ def scanrowlims(x, y, nrows, ncols):
     once for a scan in a session, it seems ok for the time being.
     '''
     import numpy as np
-    import righthand as rh
+    import cryspy.util as util
 
     if np.size(x) != np.size(y):
         print('scanrowlims: the lengths of x and y are not equal. this may \
-               result in errors.') # TODO: warnings?
+               result in errors.')
     
     if np.size(ncols)==2: # then we have a hex grid
     
         # Find the indices corresponding to the left and right edges of each row
-        rowlims=np.zeros([nrows, 2], dtype=np.uint32)
+        rowlims=np.zeros([nrows,2], dtype=np.uint32)
         
         l = 0
         for i in range(1, nrows+1):
             
-            b = ~rh.iseven(i)
-            if b:
+            b = ~util.iseven(i)
+            if b[0]:
                 r = l + ncols[0] - 1
             else:
                 r = l + ncols[0] - 2
@@ -260,7 +260,7 @@ def scanrowlims(x, y, nrows, ncols):
             
     elif np.size(ncols)==1: # then we have a square grid
     
-        rowlims=np.zeros([nrows, 2], dtype=np.uint32)
+        rowlims=np.zeros([nrows,2])
         
         l = 0
         for i in range(1, nrows+1):
@@ -288,7 +288,7 @@ def kernverts(x, y, rows, cols, xstp, ystp, idx, clipverts=True):
     inputs: x and y coordinates of scan
     '''
     import numpy as np
-    import righthand as rh
+    import cryspy.util as util
       
     if np.size(cols)==2:
         
@@ -325,7 +325,7 @@ def kernverts(x, y, rows, cols, xstp, ystp, idx, clipverts=True):
             xvs1 = np.arange(1, v1+1) * xstp - xstp
             xvs2 = np.arange(1, v2+1) * xstp - xstp
             
-            if ~rh.iseven(i):
+            if ~util.iseven(i):
     
                 v[nV:nV+v2, 0] = xvs2-xv1
                 v[nV:nV+v2, 1] = np.tile(yy+yv2, v2)
@@ -398,14 +398,14 @@ def kernfaces(v, p, idx, rows, cols, nr):
     vertices, for both hexagonal and square grid patterns.
     ''' 
     import numpy as np
-    import righthand as rh
+    import cryspy.util as util
     
     # Associate faces with vertices
     ndx=0;
     
     if np.size(cols)==2: # hex grid
 
-        pb = rh.progbar(finalcount=nr, 
+        pb = util.progbar(finalcount=nr, 
                      message='ASSOCIATING FACES WITH VERTICES')   
     
         f=np.zeros([nr,6], dtype=np.uint32)    
@@ -413,7 +413,7 @@ def kernfaces(v, p, idx, rows, cols, nr):
             
             j=(i-1)*2+1
     
-            if ~rh.iseven(i): # odd row
+            if ~util.iseven(i): # odd row
                 
                 tmp=np.array([
                      np.arange( p[j-1,0]  , p[j-1,1]+1),
@@ -434,9 +434,9 @@ def kernfaces(v, p, idx, rows, cols, nr):
                      np.arange(p[j+2,0]+1,  p[j+2,1]  )     ]).T
     
     
-            ntmp = np.size(tmp) / 6
+            ntmp = np.size(tmp)/6
             
-            for k in range(0, np.int(ntmp)): #XXX: Converting to int here could cause an issue if ntmp is not actually an int
+            for k in range(0, ntmp):
                 f[ndx, 0:6] = [tmp[k,0], tmp[k,1], tmp[k,3], tmp[k,5], tmp[k,4], tmp[k,2]]
                 ndx += 1
     
@@ -469,7 +469,7 @@ def triverts(n, v, f, cols):
     import numpy as np
         
     # Add third dimension to vertex data
-    tv = np.zeros([np.int(np.size(v)/2.0), 3]) # there are two columns, so size/2 will always be int
+    tv = np.zeros([np.size(v)/2, 3])
     tv[:,0] = v[:,0]
     tv[:,1] = v[:,1]
     del v

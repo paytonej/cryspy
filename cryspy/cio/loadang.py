@@ -4,11 +4,12 @@ def loadang(filepath, alldata=False):
     
     # TODO: Add an interpreter of what version based on number of columns etc
     
+    import string
     import numpy as np
-    from cryspy import ebsd
-    from cryspy import rot
-    from cryspy import xtal
-    import righthand as rh
+    from cryspy.ebsd import ebsd
+    from cryspy.rot import bunge, quat
+    from cryspy.xtal import orientation, interpret_point_group_name
+    from cryspy.util import progbar
     
     # open the file and separate out the header from the data
     hdr=[];dat=[];
@@ -23,7 +24,7 @@ def loadang(filepath, alldata=False):
     # Find the locations of information to extract from header
     phaseloc=[];
     for i,istr in enumerate(hdr):
-        if (istr.lower().find('phase') != -1):
+        if (string.lower(istr).find('phase') != -1):
             phaseloc.append(i)
         
         # TODO: THE FOLLOWING ARE NOT YET NEEDED IN THE CRYSPY CODE, BUT
@@ -106,38 +107,38 @@ def loadang(filepath, alldata=False):
     for i in phaseloc:
         # Get the phase number
         nom='phase'
-        sstr=hdr[i];loc=sstr.lower().find(nom)
-        phaseidnums.append(float(sstr[loc+len(nom):].strip()))
+        str=hdr[i];loc=string.lower(str).find(nom)
+        phaseidnums.append(float(str[loc+len(nom):].strip()))
         
         # Assume that the material name always follows
         nom='materialname'
-        sstr=hdr[i+1];loc=sstr.lower().find(nom)
-        materialname.append(sstr[loc+len(nom):].strip())
+        str=hdr[i+1];loc=string.lower(str).find(nom)
+        materialname.append(str[loc+len(nom):].strip())
     
         # Assume that the formula is always next
         nom='formula'
-        sstr=hdr[i+2];loc=sstr.lower().find(nom)
-        formula.append(sstr[loc+len(nom):].strip())
+        str=hdr[i+2];loc=string.lower(str).find(nom)
+        formula.append(str[loc+len(nom):].strip())
         
         # Assume that the info is always after the formula...
         nom='info'
-        sstr=hdr[i+3];loc=sstr.lower().find(nom)
-        info.append(sstr[loc+len(nom):].strip())
+        str=hdr[i+3];loc=string.lower(str).find(nom)
+        info.append(str[loc+len(nom):].strip())
     
         # ... and then the symmetry
         nom='symmetry'
-        sstr=hdr[i+4];loc=sstr.lower().find(nom)
-        symmetry.append(sstr[loc+len(nom):].strip())
+        str=hdr[i+4];loc=string.lower(str).find(nom)
+        symmetry.append(str[loc+len(nom):].strip())
         
         # ... and then the lattice constants
         nom='latticeconstants'
-        sstr=hdr[i+5];loc=sstr.lower().find(nom)
-        latticeconstants.append(sstr[loc+len(nom):].strip())
+        str=hdr[i+5];loc=string.lower(str).find(nom)
+        latticeconstants.append(str[loc+len(nom):].strip())
         
          # ... and then the number of families
         nom='numberfamilies'
-        sstr=hdr[i+6];loc=sstr.lower().find(nom)
-        numberfamilies.append(float(sstr[loc+len(nom):].strip()))
+        str=hdr[i+6];loc=string.lower(str).find(nom)
+        numberfamilies.append(float(str[loc+len(nom):].strip()))
         
         # store the line location of the beginning of the families
         famloc.append(i+7)
@@ -148,7 +149,7 @@ def loadang(filepath, alldata=False):
     # from a different file. Then compare to what the header says and 
     # print something if there is a discrepancy
     
-    pb = rh.progbar(finalcount=np.size(dat), message='LOADING EBSD DATA')
+    pb = progbar(finalcount=np.size(dat), message='LOADING EBSD DATA')
     # Parse the data into lists
 
     eul1=np.zeros(np.shape(dat))
@@ -166,7 +167,7 @@ def loadang(filepath, alldata=False):
         ndex = 0
         for line in dat:
             
-            s = [float(item) for item in line.split()]
+            s= map(float, line.split())
             
             eul1[ndex] = s[0]
             eul2[ndex] = s[1]
@@ -189,7 +190,7 @@ def loadang(filepath, alldata=False):
         ndex = 0
         for line in dat:
             
-            s = [float(item) for item in line.split()]
+            s= map(float, line.split())
             
             eul1[ndex] = s[0]
             eul2[ndex] = s[1]
@@ -213,10 +214,10 @@ def loadang(filepath, alldata=False):
     index = 0
     for item in phaseidnums:
         loc = phase == item
-        s[loc] = xtal.interpret_point_group_name(symmetry[index], 'tsl')
+        s[loc] = interpret_point_group_name(symmetry[index], 'tsl')
         index += 1 
     # Start working with what we've interpreted now
-    o = xtal.orientation(quaternions = rot.quat.from_bunge(rot.bunge(eul1,eul2,eul3)),\
+    o = orientation(quaternions = quat.from_bunge(bunge(eul1,eul2,eul3)),\
                     pointgroupnumbers = np.squeeze(s.astype(np.int)))
     pb.update(-1)
     
@@ -233,6 +234,5 @@ def loadang(filepath, alldata=False):
     ebsd_data._originalheaderdata = hdr
     ebsd_data._other = other
     ebsd_data._oimversion_numangcols = numangcols
-    ebsd_data._original_phase = phase - 1
     
     return ebsd_data

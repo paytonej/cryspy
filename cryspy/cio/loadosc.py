@@ -7,6 +7,12 @@
 #fnom = '8816-1_02_nearEdge.osc'
 
 
+from cryspy3.ebsd import ebsd
+from cryspy3.rot import bunge, quat
+from cryspy3.xtal import orientation, interpret_point_group_name
+import struct
+import numpy as np
+
 def loadosc(filename, create_ebsd_object = True, ang_output = False, \
              ang_output_filename = None):
     """ loads osc files and converts to ang format, if desired
@@ -84,14 +90,6 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     """
 
-    from cryspy.ebsd import ebsd
-    from cryspy.rot import bunge, quat
-    from cryspy.xtal import orientation, interpret_point_group_name
-    import struct
-    import numpy as np
-    import mmap
-    import time
-
     def _unpack_from_mmap(mmap_id, location_start):
         
         mmap_id.seek(location_start)
@@ -103,7 +101,7 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
             
             temp_variable = '\x01'
             
-            while temp_variable != 0:
+            while temp_variable != '\x00':
                 
                 temp_variable = mmap_id.read_byte()
                 counter += 1  
@@ -123,6 +121,7 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
     #------------------------------------------------------------------------------   
 
     # So we can measure the time it takes to read the data
+    import time
     t = time.clock()                
     
     """ 
@@ -152,6 +151,7 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
     portions we need as binary and unpack them as the correct data type.
     """
     
+    import mmap
     with open(filename, "r+b") as f:
         # memory-map the file, size 0 means whole file
         mm = mmap.mmap(f.fileno(), 0)
@@ -413,7 +413,7 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
     
     tmpini = start_phase_location+16
     tmpfin = start_phase_location+16+end_phase_1-3
-    temp = mm[tmpini:tmpfin].split(b'\x00')
+    temp = mm[tmpini:tmpfin].split('\x00')
     number_of_phases = struct.unpack('<b', temp[0])[0]
     final_phase_1 = temp[-2] # in case the third entry is reserved for something
                              # that is currently set to zero in my test data set
@@ -442,7 +442,7 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
     symmetry_temp = 0
     symmetry_counter = start_phase_location+16+end_phase_1-1
     while symmetry_temp == 0:
-        symmetry_temp = struct.unpack('<b', str.encode(mm[symmetry_counter]))[0]
+        symmetry_temp = struct.unpack('<b', mm[symmetry_counter])[0]
         symmetry_counter += 1
     
     # the last location is the symmetry in geo convention
@@ -1700,4 +1700,4 @@ def loadosc(filename, create_ebsd_object = True, ang_output = False, \
         return ebsd_data
         
     # This is it.
-    print('Elapsed time = {0}'.format(time.clock() -t))
+    print('Elapsed time = {0}'.format(time.clock() - t))

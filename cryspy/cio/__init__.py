@@ -1,5 +1,5 @@
 '''
-ovlib.cio: Data Import and Export
+cryspy3.io: Data Import and Export
 ===============================================================================
 '''
 
@@ -8,4 +8,3 @@ from .loadosc  import loadosc
 from .loadang  import loadang
 from .loadctf  import loadctf
 from .loadebsd import loadebsd
-from .loadGFtype1 import loadGFtype1, returnPhaseNames
