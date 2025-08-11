@@ -6,19 +6,19 @@ ovlib.xtal: Crystallography
 
 def point_group_number_from_space_group_number(spacegroup):
     """ extract point group from space group
-    
+
     Get the point group number from the space group number
-    
+
     Parameters
     ----------
     spacegroup : int
         space group number
-    
+
     Returns
     -------
     pointgroup : int
         point group number
-    
+
     Notes
     -----
     Point groups and space groups are numbered according to the international
@@ -62,7 +62,7 @@ def point_group_number_from_space_group_number(spacegroup):
 
 def laueclass(pointgroup, notation='international'):
     ''' get the Laue class
-    
+
     Returns the Laue class of the given point group.
 
     Parameters
@@ -72,17 +72,17 @@ def laueclass(pointgroup, notation='international'):
     notation : str (optional)
         Name of convention used: {'schoenflies', 'geo', 'international', 'tsl'}
         Default: 'international'
-    
+
     Returns
     -------
     laueclass : int
         the number corresponding to the Laue class of the point group
-    
+
     Notes
     -----
     The Laue class of a point group is the next higher-order group in the same
     Bravais lattice that contains a center of symmetry.
-    
+
     ===========  ============  ===============  =====  =========================
     Point Group  Space Groups  Bravais Lattice  Name   Notes
     ===========  ============  ===============  =====  =========================
@@ -122,16 +122,22 @@ def laueclass(pointgroup, notation='international'):
     '''
 
     if type(pointgroup)==str:
+
         pgid = interpret_point_group_name(pointgroup, notation)
+
     elif type(pointgroup)==int:
+
         pgid = pointgroup
+
     else:
-        print 'pointgroup input to laueclass was neither a string \
-               nor an integer. Using laue class m.'
+
+        print('pointgroup input to laueclass was neither a string \
+               nor an integer. Using laue class m.') # TODO: check into using warnings package
         pgid = 1
 
     if pgid > 32:
-        print 'Invalid point group number. Returning 32.'
+
+        print('Invalid point group number. Returning 32.') # TODO: check into using warnings package
 
     laue = 32
     if pgid <= 29:
@@ -161,16 +167,16 @@ def laueclass(pointgroup, notation='international'):
 
 def ctf_laue_from_laue_group(laueclass):
     ''' channel text file laue group interpretation
-    
+
     Converts between the identification scheme for Laue groups used in ovlib
     (which is the point group corresponding to the Laue class) to the scheme
     used in Channel Text Files (*.ctf).
-    
+
     Parameters
     ----------
     laueclass : int
         Point group number corresponding to the laue class of the phase.
-    
+
     Returns
     -------
     ctflaue : int
@@ -211,33 +217,33 @@ def ctf_laue_from_laue_group(laueclass):
 def rotationelements(point_group_name, notation='international'):
     """
     Function for generating rotational symmetries
-    
+
     Parameters
     ----------
     point_group_name : str
         The name of the point group.
-       
+
     notation : string (optional)
         Name of convention used: {'schoenflies', 'geo', 'international', 'tsl'}
         Default: 'international'
-    
+
     Returns
     -------
     rotsymm : quaternion class
         The set of rotational symmetries.
-    
+
     Notes
     -----
     As the name suggests, this function returns only the rotational symmetry
     elements and NOT the full symmetry, which may include rotoinversions. Thus,
     this should be used carefully and only applied to orientations. Many
     symmetry-related operations on vectors or miller indices should use the
-    full set of symmetry operations.    
+    full set of symmetry operations.
     """
     import numpy as np
     import numpy.linalg as npla
-    import cryspy.util as util
-    
+    import righthand as rh
+
     pge = pointgroupelements(point_group_name, notation)
     n = pge.numel()
     a = pge.to_array()
@@ -247,8 +253,8 @@ def rotationelements(point_group_name, notation='international'):
     for i in range(0,n):
         determinant[i] = npla.det(a[i,:].reshape(3,3))
 
-    determinant = util.sigdec(determinant, 1)
-    
+    determinant = rh.sigdec(determinant, 1)
+
     if np.shape(determinant)[0] > 1:
         rotsymm = pge[np.squeeze(determinant == 1)]
     else:
@@ -260,7 +266,7 @@ def rotationelements(point_group_name, notation='international'):
 
 def interpret_point_group_number(point_group_number, notation='international'):
     """ convert point group number to point group name
-    
+
     Parses a point group number and converts it to the point group name in the
     desired notation.
 
@@ -432,7 +438,7 @@ def interpret_point_group_number(point_group_number, notation='international'):
 
 def interpret_point_group_name(point_group_name, notation='international'):
     ''' convert point group name to number
-    
+
     Parses a point group name and converts it to the point group number.
 
     Parameters
@@ -619,10 +625,10 @@ def interpret_point_group_name(point_group_name, notation='international'):
 
 def pointgroupelements(point_group_name, notation='international'):
     ''' generate point group elements
-    
-    Function for generating point group symmetry elements containing 
+
+    Function for generating point group symmetry elements containing
     subfunctions for creating the point group symmetries.
-    
+
     Parameters
     ----------
     point_group_name : {str, int}
@@ -630,8 +636,8 @@ def pointgroupelements(point_group_name, notation='international'):
 
     notation : str
         Name of convention used: {'schoenflies', 'geo', 'international', 'tsl'}
-        Default: 'international'    
-    
+        Default: 'international'
+
     Returns
     -------
     pge : rmat class
@@ -640,7 +646,7 @@ def pointgroupelements(point_group_name, notation='international'):
     Notes
     -----
     This is a Python translation of the codes from [1]_.
-    
+
     References
     ----------
     .. [1] M. De Graef, "Introduction to Conventional Transmission Electron
@@ -649,7 +655,7 @@ def pointgroupelements(point_group_name, notation='international'):
 
     def make_generator_string(point_group_id_number):
         """
-        
+
         Notes:
         - Need to check that point groups 39 and 90 are correct.
         - The matrices produced may be incorrect for space groups 115-120,
@@ -703,7 +709,7 @@ def pointgroupelements(point_group_name, notation='international'):
 
     def interpret_generator_string(generator_string):
         import numpy as np
-        
+
         n = len(generator_string)
         generator_matrices = np.zeros([n,9])
         for i in range(0,n):
@@ -764,16 +770,16 @@ def pointgroupelements(point_group_name, notation='international'):
         I have some concerns that the exact matrices produced in the present
         code may, however, not all be correct. See "notes" in
         make_generator_string.
-        
+
         Parameters
         ----------
         generator_matrices : numpy array
-        
+
         Returns
         -------
-        
+
         '''
-        import cryspy.util as util
+        import righthand as rh
         import numpy as np
 
         n1 = 0
@@ -788,7 +794,7 @@ def pointgroupelements(point_group_name, notation='international'):
                     generator_matrices = np.concatenate((generator_matrices,
                                               tmp.reshape(1,9)), axis=0)
 
-            generator_matrices, loc, tmp = util.uniquerows(generator_matrices)
+            generator_matrices, loc, tmp = rh.uniquerows(generator_matrices)
             n1 = n2
             n2 = generator_matrices.shape[0]-1
 
@@ -857,8 +863,8 @@ class lattsite(object):
             self.z = util.vecarrayconvert(z)
 
         else:
-            print "lattvec construction error: check that the lengths of u,"\
-                  " v, and w are all the same."
+            print("lattvec construction error: check that the lengths of u,"\
+                  " v, and w are all the same.") # TODO: check into using warnings package
             return None
 
 #-------------------------------------------------------------------------------
@@ -872,7 +878,7 @@ class lattsite(object):
             '''
             import numpy as np
             import cryspy.rot as rot
-            
+
             if isinstance(q2, rot.quat):
                 t2 =   q2.a * q2.b
                 t3 =   q2.a * q2.c
@@ -903,7 +909,7 @@ class lattsite(object):
         multiply by direct structure matrix to get cartesian vector
         '''
         if isinstance(unit_cell, unitcell):
-            
+
             d = unit_cell.d
             vx = d[0, 0] * self.x + d[0, 1] * self.y + d[0, 2] * self.z
             vy = d[1, 0] * self.x + d[1, 1] * self.y + d[1, 2] * self.z
@@ -919,7 +925,7 @@ class lattsite(object):
         multiply by inverse transpose direct structure matrix
         '''
         import cryspy.util as util
-        
+
         if isinstance(unit_cell, unitcell):
             x = arg[0]
             y = arg[1]
@@ -962,7 +968,7 @@ class lattsite(object):
         '''
         import cryspy.util as util
         import numpy as np
-        
+
         if isinstance(site2, lattsite) and isinstance(origin, lattsite) and \
             isinstance(unit_cell, unitcell):
 
@@ -1003,7 +1009,7 @@ class lattsite(object):
         import numpy as np
         qlist=np.array([self.x,self.y,self.z]).T
 
-        print '\n Lattice site coordinates [x y z]'
+        print('\n Lattice site coordinates [x y z]') # TODO: check into using warnings package
         np.set_printoptions(precision=3,suppress=True)
         if np.shape(qlist)[0]==3:
             return ' '.join(str(x) for x in qlist)
@@ -1058,8 +1064,8 @@ class lattvec(object):
             #self.w_ = self.w * nrm
 
         else:
-            print "lattvec construction error: check that the lengths of u,"\
-                  " v, and w are all the same."
+            print("lattvec construction error: check that the lengths of u,"\
+                  " v, and w are all the same.") # TODO: check into using warnings package
             return None
 
 #-------------------------------------------------------------------------------
@@ -1094,23 +1100,39 @@ class lattvec(object):
 
 #-------------------------------------------------------------------------------
 
-    def rotate(self, q2):
+    def rotate(self, r):
         '''
         rotate lattice vector using quaternion rotation object
+
+        Parameters
+        ----------
+        q : quat object
+            object containing quaternions or rotation matrices
+
+        Returns
+        -------
+        v : lattvec object
+            rotated lattice vector
+
+        Examples
+        --------
+        >>> v = lattvec(1,0,4)
+        >>> s = pointgroupelements('m-3m')
+        >>> ms = v.rotate(s)
         '''
-        from cryspy.rot import quat
+        from cryspy.rot import quat, rmat
         import numpy as np
 
-        if isinstance(q2, quat):
-            t2 =   q2.a * q2.b
-            t3 =   q2.a * q2.c
-            t4 =   q2.a * q2.d
-            t5 =  -q2.b * q2.b
-            t6 =   q2.b * q2.c
-            t7 =   q2.b * q2.d
-            t8 =  -q2.c * q2.c
-            t9 =   q2.c * q2.d
-            t10 = -q2.d * q2.d
+        if isinstance(r, quat):
+            t2 =   r.a * r.b
+            t3 =   r.a * r.c
+            t4 =   r.a * r.d
+            t5 =  -r.b * r.b
+            t6 =   r.b * r.c
+            t7 =   r.b * r.d
+            t8 =  -r.c * r.c
+            t9 =   r.c * r.d
+            t10 = -r.d * r.d
 
             v1new = np.array([2.0 * ( (t8 + t10) * self.u +
                                       (t6 -  t4) * self.v +
@@ -1123,6 +1145,14 @@ class lattvec(object):
                                       (t5 +  t8) * self.w ) + self.w])
 
             return lattvec(u=v1new, v=v2new, w=v3new)
+        
+        if isinstance(r, rmat):
+
+            v1new = self.u * r.g11 + self.v * r.g21 + self.w * r.g31
+            v2new = self.u * r.g12 + self.v * r.g22 + self.w * r.g32
+            v3new = self.u * r.g13 + self.v * r.g23 + self.w * r.g33
+
+            return lattvec(u=v1new, v=v2new, w=v3new)
 
 #-------------------------------------------------------------------------------
 
@@ -1132,13 +1162,13 @@ class lattvec(object):
         '''
         import cryspy.util as util
         if isinstance(unit_cell, unitcell):
-            
+
             d = unit_cell.d
             vx = d[0, 0] * self.u + d[0, 1] * self.v + d[0, 2] * self.w
             vy = d[1, 0] * self.u + d[1, 1] * self.v + d[1, 2] * self.w
             vz = d[2, 0] * self.u + d[2, 1] * self.v + d[2, 2] * self.w
             nrm = 1.0 / util.vecarraynorm([vx, vy, vz])
-            
+
             return [vx, vy, vz] * nrm
 
 #-------------------------------------------------------------------------------
@@ -1170,7 +1200,7 @@ class lattvec(object):
         import cryspy.util as util
         import numpy as np
         if isinstance(unit_cell, unitcell):
-            
+
             m = unit_cell.m
             return np.sqrt(util.xtaldot(p1=self.u, p2=self.v, p3=self.w,
                                    g11=m[0, 0], g12=m[0, 1], g13=m[0, 2],
@@ -1198,6 +1228,120 @@ class lattvec(object):
 
             return np.arccos(nrm * pgq)
 
+# ----------------------------------------------------------------------------
+
+#    def to_fundzone(self, symmetry, unit_cell, fundzone=None):
+# TODO: Copied from miller class but not yet translated to lattvec
+#        ''' put miller object into the fundamental zone
+#
+#        Parameters
+#        ----------
+#        symmetry : symm object
+#        unit_cell : unitcell object
+#        fundzone : quat object (optional)
+#            Quaternion describing rotation required to put the Miller indices
+#            into the desired fundamental zone. Defaults to identity quaternion.
+#
+#        Returns
+#        -------
+#        mf : miller object
+#            miller indices projected into the fundamental zone for the given
+#            symmetry
+#
+#        Examples
+#        --------
+#        >>> import numpy as np
+#        >>> from cryspy.util import stereoproj
+#        >>> pgn = 'm-3m'
+#        >>> s   = symm(pgn)
+#        >>> pointgroupnumber = interpret_point_group_name(pgn)
+#        >>> maxval  = 49
+#        >>> numvals = 500
+#        >>> h  = maxval * np.random.rand(numvals) - maxval / 2.0
+#        >>> k  = maxval * np.random.rand(numvals) - maxval / 2.0
+#        >>> l  = maxval * np.random.rand(numvals) - maxval / 2.0
+#        >>> m  = miller(h, k, l) # create miller
+#        >>> uc = unitcell()
+#        >>> m2 = m.to_fundzone(s, uc)
+#        >>> pf = stereoproj()
+#        >>> pf.add_miller(m,  uc, uppermarkerfacecolor='r',
+#        ...                       lowermarkerfacecolor='w',
+#        ...                       uppermarkeredgecolor='r',
+#        ...                       lowermarkeredgecolor='r')
+#        >>> pf.add_miller(m2, uc, uppermarkerfacecolor='b',
+#        ...                       lowermarkerfacecolor='w',
+#        ...                       uppermarkeredgecolor='b',
+#        ...                       lowermarkeredgecolor='b')
+#        '''
+#        import inspect
+#        import cryspy.rot as rot
+#        import cryspy.util as util
+#        import righthand as rh
+#        import numpy as np
+#
+#        if fundzone==None:
+#            fundzone = rot.quat()
+#
+#        ms = self.symmetrize(symmetry)
+#
+#        # Consolidate symmetrized list into a single array of cartesian vectors
+#        x = np.zeros([self.size, np.size(ms)])
+#        y = np.zeros([self.size, np.size(ms)])
+#        z = np.zeros([self.size, np.size(ms)])
+#        k = 0
+#        for item in ms:
+#            tmp = item.to_cartesian(unit_cell)
+#            x[0:self.size, k] = tmp[0]
+#            y[0:self.size, k] = tmp[1]
+#            z[0:self.size, k] = tmp[2]
+#            k += 1
+#
+#        # Normalize cartesian vectors
+#        nrm = 1.0 / util.vecarraynorm([x, y, z])
+#        x = x * nrm
+#        y = y * nrm
+#        z = z * nrm
+#
+#        # Convert to spherical coordinates
+#        theta, r, rho = rh.polar(x, y, z)
+#
+#        # get limits of the fundamental zone of the stereographic projection
+#        mintheta, maxtheta, minrho, maxrho = fundzonePF(
+#                                                   symmetry.point_group_number)
+#
+#        # handle theta cases on edges of fundamental zone
+#        cutoff = np.sqrt(np.spacing(1))
+#        loc = np.absolute(theta - mintheta) < cutoff
+#        theta[loc] = mintheta
+#        loc = np.absolute(theta - maxtheta) < cutoff
+#        theta[loc] = maxtheta
+#
+#        if inspect.isfunction(maxrho):
+#            mxr = maxrho(theta)
+#            loc = np.absolute(rho - minrho) < cutoff
+#            rho[loc] = minrho
+#            loc = np.absolute(rho - mxr)    < cutoff
+#            rho[loc] = mxr[loc]
+#            crt = np.array(theta <= maxtheta) * np.array(rho <= mxr) * \
+#                  np.array(theta >= mintheta) * np.array(rho >= minrho)
+#        else:
+#            crt = np.array(theta <= maxtheta) * np.array(rho <= maxrho) * \
+#                  np.array(theta >= mintheta) * np.array(rho >= minrho)
+#        loc = np.argmax(crt, axis=1)
+#
+#        # extract the symmetrically-equivalent miller indices in the fundamental zone
+#        h = np.zeros(self.size)
+#        k = np.zeros(self.size)
+#        l = np.zeros(self.size)
+#
+#        for i in range(0, np.size(loc)):
+#            h[i] = np.squeeze(ms[loc[i]].h)[i]
+#            k[i] = np.squeeze(ms[loc[i]].k)[i]
+#            l[i] = np.squeeze(ms[loc[i]].l)[i]
+#
+#        # create a new miller object and rotate it into the desired zone
+#        return lattvec(x, y, z).rotate(fundzone)
+
 #-------------------------------------------------------------------------------
 
     def __sub__(self,vec2):
@@ -1218,7 +1362,7 @@ class lattvec(object):
         import numpy as np
         qlist=np.array([self.u,self.v,self.w]).T
 
-        print '\n Lattice direction vectors [u v w]'
+        print('\n Lattice direction vectors [u v w]')
         np.set_printoptions(precision=3,suppress=True)
         if np.shape(qlist)[0]==3:
             return ' '.join(str(x) for x in qlist)
@@ -1296,8 +1440,8 @@ class miller:
             self.size = np.size(h)
 
         else:
-            print "lattvec construction error: check that the lengths of u,"\
-                  " v, and w are all the same."
+            print("lattvec construction error: check that the lengths of u,"\
+                  " v, and w are all the same.") # TODO: check into using warnings package
             return None
 
 #-------------------------------------------------------------------------------
@@ -1408,7 +1552,7 @@ class miller:
         import numpy as np
         import cryspy.util as util
         if isinstance(unit_cell,unitcell):
-            
+
             x = arg[0]
             y = arg[1]
             z = arg[2]
@@ -1451,10 +1595,10 @@ class miller:
         --------
         >>> plane1.angle(plane2, my_unit_cell) #TODO: Fix example
         '''
-        
+
         import cryspy.util as util
         import numpy as np
-        
+
         if isinstance(unit_cell, unitcell) and isinstance(plane2, miller):
             m = unit_cell.minv
 
@@ -1500,6 +1644,7 @@ class miller:
         >>> common_dir = my_first_plane.cross( my_second_plane ) #TODO: Fix example
         '''
         import cryspy.util as util
+
         if isinstance(plane2, miller):
             u, v, w = util.vecarraycross(
                             [self.h,   self.k,   self.l],
@@ -1525,13 +1670,13 @@ class miller:
 
             Examples
             --------
-            >>> m = miller(1,0,4)
+            >>> m = miller(1, 0, 4)
             >>> s = pointgroupelements('m-3m')
-            >>> ms= m * s
+            >>> ms = m.rotate(s)
             '''
             from cryspy.rot import quat, rmat
             import numpy as np
-            
+
             if isinstance(r, quat):
                 t2 =   r.a * r.b
                 t3 =   r.a * r.c
@@ -1658,6 +1803,7 @@ class miller:
         import inspect
         import cryspy.rot as rot
         import cryspy.util as util
+        import righthand as rh
         import numpy as np
 
         if fundzone==None:
@@ -1684,7 +1830,7 @@ class miller:
         z = z * nrm
 
         # Convert to spherical coordinates
-        theta, r, rho = util.polar(x, y, z)
+        theta, r, rho = rh.polar(x, y, z)
 
         # get limits of the fundamental zone of the stereographic projection
         mintheta, maxtheta, minrho, maxrho = fundzonePF(
@@ -1714,7 +1860,7 @@ class miller:
         h = np.zeros(self.size)
         k = np.zeros(self.size)
         l = np.zeros(self.size)
-        
+
         for i in range(0, np.size(loc)):
             h[i] = np.squeeze(ms[loc[i]].h)[i]
             k[i] = np.squeeze(ms[loc[i]].k)[i]
@@ -1747,7 +1893,7 @@ class miller:
         import numpy as np
         qlist=np.array(np.squeeze([self.h, self.k, self.l])).T
 
-        print '\n Miller indices (h k l)'
+        print('\n Miller indices (h k l)') # TODO: check into using warnings package
         np.set_printoptions(precision=3, suppress=True)
         if np.shape(qlist)[0]==3:
             return ' '.join(str(x) for x in qlist)
@@ -1783,7 +1929,7 @@ class unitcell(object):
         # always type g11=..., g12=... etc.
         import numpy as np
         import numpy.linalg as npla
-        import cryspy.util as util
+        import righthand as rh
 
         # check that the shapes of all are the same
         if np.shape( a)==np.shape( b)==np.shape( c)==\
@@ -1796,9 +1942,9 @@ class unitcell(object):
             self.a = np.float64( np.squeeze( np.array( list( (a,) ))))
             self.b = np.float64( np.squeeze( np.array( list( (b,) ))))
             self.c = np.float64( np.squeeze( np.array( list( (c,) ))))
-            self.alpha = util.radians(np.float64( np.squeeze( np.array( list( (alpha,) )))))
-            self.beta  = util.radians(np.float64( np.squeeze( np.array( list( (beta,) )))))
-            self.gamma = util.radians(np.float64( np.squeeze( np.array( list( (gamma,) )))))
+            self.alpha = rh.to_radians(np.float64( np.squeeze( np.array( list( (alpha,) )))))
+            self.beta  = rh.to_radians(np.float64( np.squeeze( np.array( list( (beta,) )))))
+            self.gamma = rh.to_radians(np.float64( np.squeeze( np.array( list( (gamma,) )))))
 
             # calculate the metric matrix and its inverse
             ca = np.cos(self.alpha)
@@ -1834,7 +1980,7 @@ class unitcell(object):
         import numpy as np
         qlist=np.array([self.a,self.b,self.c,self.alpha,self.beta,self.gamma]).T
 
-        print '\n Unit cell a, b, c, alpha, beta, gamma'
+        print('\n Unit cell a, b, c, alpha, beta, gamma') # TODO: check into using warnings package
         np.set_printoptions(precision=3,suppress=True)
         if np.shape(qlist)[0]==3:
             return ' '.join(str(x) for x in qlist)
@@ -1845,27 +1991,27 @@ class unitcell(object):
 
 class symm(object):
     """symmetry object
-    
+
     Wraps up the symmetry elements for a given point group into a single
     object. Pure rotations are described in quaternion form while the complete
     set of symmetry operations (i.e., including improper rotations) is
     given as rotation matrices.
-    
+
     Parameters
     ----------
     pointgroup : str
         point group of the crystal
     notation : {'international', 'schoenflies', 'geo', 'tsl', 'numeric'}
         Default: 'international'
-    
+
     Notes
     -----
     - No .size method is provided for this class because the number of symmetry
       elements is different from the number of rotation operations. Both of
       these parameters are stored within the symm object and have their own
-      .size methods.    
+      .size methods.
     """
-    
+
     def __init__(self, pointgroup='1', notation='international'):
         import cryspy.rot as rot
 
@@ -1876,7 +2022,7 @@ class symm(object):
             self.notation = 'international'
         else:
             self.point_group_name = str(pointgroup)
-        
+
         # Use string arguments to construct symm object attributes
         self.point_group_number = interpret_point_group_name(
                                              self.point_group_name,
@@ -1909,32 +2055,39 @@ class orientation(object):
                  pointgroupnumbers=None, reference=None):
         import cryspy.rot as rot
         import cryspy.xtal as xtal
+        import cryspy.util as util
         import numpy as np
         import warnings
 
-        if reference==None:
+        if reference is None:
             reference = rot.quat()
 
-        if quaternions==None:
+        if quaternions is None:
             quaternions = rot.quat()
 
-        if pointgroupnumbers==None:
-            pointgroupnumbers = 1
+        if pointgroupnumbers is None:
+            pointgroupnumbers = np.tile(1, quaternions.size)
+
+        pointgroupnumbers = util.vecarrayconvert(pointgroupnumbers)
 
         if isinstance(quaternions, rot.quat):
             self.rotations = quaternions
         else:
             self.rotations = rot.quat()
 
+        loc = np.where(np.logical_or(pointgroupnumbers > 32, pointgroupnumbers < 1))[0]
+        if loc.size != 0:
+            pointgroupnumbers[loc] = 1
+            #FIXME: make a warning warnings.warn()
+            print('\nWARNING: Invalid point group numbers at:\n{0}'.format(loc))
 
-        loc = np.where(np.logical_or(pointgroupnumbers > 32, pointgroupnumbers < 1))
-        pointgroupnumbers[loc] = 1
-        warnings.warn('Invalid point group numbers at:\n{0}'.format(loc))
         self.symmetry = pointgroupnumbers
 
         if isinstance(reference, rot.quat):
             self.reference = reference
-        
+        else:
+            warnings.warn('reference needs to be quaternion')
+
         self.size = self.rotations.size
 
         # Add two parameters to the orientation object. One is a list of
@@ -1947,17 +2100,18 @@ class orientation(object):
         for item in u:
             cs_set = xtal.symm(item, 'numeric')
             cs.append(cs_set)
-            cslocs = np.where(self.symmetry==item)
+            cslocs.append(np.where(self.symmetry==item)[0])
         self.cs = cs
         self.cslocs = cslocs
 
-    def __getitem__(self,index):
+    def __getitem__(self, index):
+
             return orientation(quaternions = self.rotations[index],
                                pointgroupnumbers = self.symmetry[index],
-                               reference = self.reference())
+                               reference = self.reference)
 
     def __repr__(self):
-        
+
         import numpy as np
 
         ar= self.reference.a[0]
@@ -1967,47 +2121,106 @@ class orientation(object):
 
         repstr = '{0:^45s}\n'.format('orientation object')
         repstr += '{0:-^45s}\n'.format('----')
-        repstr += ' {0:^7s}{1:^7s}{2:^7s}{3:^7s}   # {4:<s}\n'.format(        \
+        repstr += ' {0:^7s}{1:^7s}{2:^7s}{3:^7s}   # {4: <s}\n'.format(        \
                                                'a', 'b','c', 'd','point group')
-        
+
         fmtstr = '<{0: >7.3f}{1: >7.3f}{2: >7.3f}{3: >7.3f} >' + \
-                 ' # {4: >6.0f}\n'
+                 ' # {4: <2d}\n'
 
         if np.shape(self.rotations.a)[0] > 15:
-            
+
             for i in np.arange(0, 5):
-                repstr += fmtstr.format(self.rotations.a[i], 
-                                        self.rotations.b[i], 
-                                        self.rotations.c[i], 
-                                        self.rotations.d[i], 
+                repstr += fmtstr.format(self.rotations.a[i],
+                                        self.rotations.b[i],
+                                        self.rotations.c[i],
+                                        self.rotations.d[i],
                                         self.symmetry[i])
             for i in np.arange(0, 3):
                 repstr += '  {0:^7s}{0:^7s}{0:^7s}{0:^7s}  \n'.format('.')
             n = np.shape(self.reference.a)[0]-1
             for i in np.arange(n-5, n):
-                repstr += fmtstr.format(self.rotations.a[i], 
-                                        self.rotations.b[i], 
-                                        self.rotations.c[i], 
-                                        self.rotations.d[i], 
-                                        self.symmetry[i])    
+                repstr += fmtstr.format(self.rotations.a[i],
+                                        self.rotations.b[i],
+                                        self.rotations.c[i],
+                                        self.rotations.d[i],
+                                        self.symmetry[i])
 
         else:
 
-            
             for i in np.arange(0, self.size):
-                repstr += fmtstr.format(self.rotations.a[i], 
-                                        self.rotations.b[i], 
-                                        self.rotations.c[i], 
-                                        self.rotations.d[i], 
+                repstr += fmtstr.format(self.rotations.a[i],
+                                        self.rotations.b[i],
+                                        self.rotations.c[i],
+                                        self.rotations.d[i],
                                         self.symmetry[i])
-                                        
-        repstr += '{0:-^45s}\n'.format('----')                    
+
+        repstr += '{0:-^45s}\n'.format('----')
         namestr = 'reference q = '
         namestr += '<{0: >7.3f}{1: >7.3f}{2: >7.3f}{3: >7.3f} >'.format(ar, br,
                                                                         cr, dr)
-        repstr += '{0:<s}\n'.format(namestr)                          
+        repstr += '{0:<s}\n'.format(namestr)
         repstr += '\n'
         return repstr
+
+    def to_fundzone(self, qref=None):
+
+        import numpy as np
+        import cryspy.rot as rot
+
+        i = 0
+        a = np.zeros(self.size)
+        b = np.zeros(self.size)
+        c = np.zeros(self.size)
+        d = np.zeros(self.size)
+        for i in range(0, len(self.cslocs)):
+            loc = self.cslocs
+
+            q = self[loc].rotations.to_fundzone(self.cs[i],
+                                                qref=self.reference)
+
+            a[loc] = q.a
+            b[loc] = q.b
+            c[loc] = q.c
+            d[loc] = q.d
+
+        r = rot.quat(a, b, c, d)
+
+        return orientation(quaternions=r,
+                           pointgroupnumbers=self.symmetry,
+                           reference=self.reference)
+
+    # FIXME: The issue with the way we symmetrize is that it returns a list.
+    # With multiple symmetries, we would have different shape lists.
+# Should we do this index-wise? Or CSLOC wise?
+#    def symmetrize(self, INDEX):
+#        import numpy as np
+#        import cryspy.rot as rot
+#
+#        i = 0
+#        a = np.zeros(self.size)
+#        b = np.zeros(self.size)
+#        c = np.zeros(self.size)
+#        d = np.zeros(self.size)
+#        for i in range(0, len(self.cslocs)):
+#            loc = self.cslocs
+#
+#            q = self[loc].rotations.symmetrize(self.cs[i],
+#                                               qref=self.reference)
+#
+#            for j in range(, len)
+#
+#            a[loc] = q.a
+#            b[loc] = q.b
+#            c[loc] = q.c
+#            d[loc] = q.d
+#
+#        r = rot.quat(a, b, c, d)
+#
+#        return orientation(quaternions=r,
+#                           pointgroupnumbers=self.symmetry,
+#                           reference=self.reference)
+    # TODO: Methods for symmetrize, misorientation, rotate
+
 
 # -----------------------------------------------------------------------------
 
@@ -2100,7 +2313,7 @@ def ipfgrid(pointgroupnumber, resolution=0.5, uc=None, trans='ea',
     import cryspy.rot as rot
     import cryspy.util as util
     import numpy as np
-    
+
     mq = mintheta; del mintheta # rename so we can reuse 'mintheta'
 
     if uc==None:
@@ -2174,8 +2387,8 @@ def ipfgrid(pointgroupnumber, resolution=0.5, uc=None, trans='ea',
         xp, yp, hem = util.stereotransstandard([x, y, z])
     else:
         # Assume the user wants equal area if they don't want the default
-        print 'Requested projection transformation not recognized. ' \
-              'Proceeding with equal area.\n'
+        print('Requested projection transformation not recognized. ' \
+              'Proceeding with equal area.\n') # TODO: check into using warnings package
         xp, yp, hem = util.eatransstandard([x, y, z])
 
     return xp, yp, hem, edges
@@ -2305,15 +2518,15 @@ def fundzonePF(pointgroupnumber):
 # -----------------------------------------------------------------------------
 def iscentrosymmetric(pointgroupnumber):
     ''' center of symmetry check
-    
+
     Returns true if the point group has a center of symmetry and false if it
     does not.
-    
+
     Parameters
     ----------
     pointgroupnumber : int numpy array
         point group number
-    
+
     Returns
     -------
     b : Boolean

@@ -1,0 +1,14 @@
+'''
+Portions of this package written after August 2015 were produced by Eric Payton as part of the
+in-house research of the Metallic Materials and Processes Research Team, Metals Branch, 
+Structural Materials Division, Materials and Manufacturing Directorate, Air Force Research Laboratory.
+
+As a work product prepared by an employee of the United States government during the
+course of that employee's official duties, those portions of this work are not entitled to domestic
+copyright protection according to section 105 of the Copyright Act, and is thus part of the public domain.
+
+Portions of this package written prior to August 2015 are (C) Eric Payton.
+
+Portions of this package included from MTEX are (C) Ralf Hielscher and Florian Bachmann and are
+covered by GPL2 license. 
+'''
