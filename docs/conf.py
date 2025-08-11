@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ovlib documentation build configuration file, created by
+# cryspy documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 26 18:32:41 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,9 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ovlib'
-copyright = u'2013, Eric Payton, Federal Institute for Materials Research \
-and Testing, Berlin'
+project = u'cryspy'
+copyright = u'2013-2025 Eric Payton, University of Cincinnati'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -165,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ovlibdoc'
+htmlhelp_basename = 'cryspydoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -184,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'ovlib.tex', u'ovlib Documentation',
+  ('index', 'cryspy.tex', u'ovlib Documentation',
    u'Author', 'manual'),
 ]
 
@@ -214,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ovlib', u'ovlib Documentation',
+    ('index', 'cryspy', u'cryspy Documentation',
      [u'Author'], 1)
 ]
 
@@ -228,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'ovlib', u'ovlib Documentation',
-   u'Author', 'ovlib', 'One line description of project.',
+  ('index', 'cryspy', u'cryspy Documentation',
+   u'Author', 'cryspy', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -246,10 +245,10 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'ovlib'
+epub_title = u'cryspy'
 epub_author = u'Author'
 epub_publisher = u'Author'
-epub_copyright = u'2013, Author'
+epub_copyright = u'2013-2025, Author'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
